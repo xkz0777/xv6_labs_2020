@@ -1,0 +1,25 @@
+{
+    "files.exclude": {
+        "**/*.d": true,
+        "**/*.o": true,
+        "**/*.asm": true,
+        "**/*.sym": true,
+        "**/*.S": true,
+        "**/_*": true,
+        // "vectors.S": true,
+        // "bootblock": true,
+        // "entryother": true,
+        "**/initcode": true,
+        "**/initcode.out": true,
+        // "kernelmemfs": true,
+        // "mkfs": true,
+        // "kernel/kernel": true,
+        // "user/usys.S": true,
+        // ".gdbinit": true,
+        // "myapi.key": true,
+        // "*-handin.tar.gz": true,
+        // "xv6.out*": true,
+        // ".vagrant/": true,
+        // "submissions/": true,
+    }
+}
