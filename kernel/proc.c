@@ -119,7 +119,7 @@ found:
   uint64 va = KSTACK((int)(p - proc));
   p->kstack = va;
   // Each process's kernel page table has a mapping for that process's kernel stack
-  user_kvmmap(p->kpagetable, va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
+  kvmmap_(p->kpagetable, va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
   // kvmmap(va, (uint64)pa, PGSIZE, PTE_R | PTE_W); 会导致 remap
 
   // Set up new context to start executing at forkret,
@@ -172,7 +172,7 @@ proc_pagetable(struct proc *p)
   pagetable_t pagetable;
 
   // An empty page table.
-  pagetable = uvmcreate();
+  pagetable = vmcreate();
   if(pagetable == 0)
     return 0;
 
@@ -246,6 +246,7 @@ userinit(void)
   // and data into it.
   uvminit(p->pagetable, initcode, sizeof(initcode));
   p->sz = PGSIZE;
+  kvmcopy(p->pagetable, p->kpagetable, 0, p->sz);
 
   // prepare for the very first "return" from kernel to user.
   p->trapframe->epc = 0;      // user program counter
@@ -269,10 +270,17 @@ growproc(int n)
 
   sz = p->sz;
   if(n > 0){
-    if((sz = uvmalloc(p->pagetable, sz, sz + n)) == 0) {
+    uint64 newsz;
+    if((newsz = uvmalloc(p->pagetable, sz, sz + n)) == 0) {
       return -1;
     }
+    if (kvmcopy(p->pagetable, p->kpagetable, sz, n) < 0) {
+      uvmdealloc(p->pagetable, newsz, sz);
+      return -1;
+    }
+    sz = newsz;
   } else if(n < 0){
+    kvmdealloc(p->kpagetable, sz, sz + n);
     sz = uvmdealloc(p->pagetable, sz, sz + n);
   }
   p->sz = sz;
@@ -294,7 +302,9 @@ fork(void)
   }
 
   // Copy user memory from parent to child.
-  if(uvmcopy(p->pagetable, np->pagetable, p->sz) < 0){
+  // Also copy user page table to kernel pagetable
+  if((uvmcopy(p->pagetable, np->pagetable, p->sz) < 0) || 
+     (kvmcopy(np->pagetable, np->kpagetable, 0, p->sz) < 0)) {
     freeproc(np);
     release(&np->lock);
     return -1;

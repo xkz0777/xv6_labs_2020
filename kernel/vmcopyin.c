@@ -29,6 +29,7 @@ statscopyin(char *buf, int sz) {
 int
 copyin_new(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
 {
+  // 这里的 pagetable 已经没用了，因为不再需要通过软件来找到地址，硬件会利用页表去找，下同
   struct proc *p = myproc();
 
   if (srcva >= p->sz || srcva+len >= p->sz || srcva+len < srcva)
