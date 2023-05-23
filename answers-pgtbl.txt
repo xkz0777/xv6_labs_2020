@@ -1,0 +1,1 @@
+因为 srcva + len < srcva 可以防止 srcva + len overflow 从而拷贝 ELF 二进制文件的数据到内核中

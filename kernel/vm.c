@@ -391,7 +391,7 @@ int kvmcopy(pagetable_t pagetable, pagetable_t kpagetable, uint64 start, uint64 
     uint64 pa = PTE2PA(*pte);
     int perm = PTE_FLAGS(*pte) & ~PTE_U;
     if (mappages(kpagetable, i, PGSIZE, pa, perm) != 0) {
-      // uvmunmap(kpagetable, start, (i - start) / PGSIZE, 0);
+      uvmunmap(kpagetable, start, (i - start) / PGSIZE, 0);
       return -1;
     }
   }
@@ -442,24 +442,7 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 int
 copyin(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
 {
-  uint64 n, va0, pa0;
-
-  while(len > 0){
-    va0 = PGROUNDDOWN(srcva);
-    pa0 = walkaddr(pagetable, va0);
-    if(pa0 == 0)
-      return -1;
-    n = PGSIZE - (srcva - va0);
-    if(n > len)
-      n = len;
-    memmove(dst, (void *)(pa0 + (srcva - va0)), n);
-
-    len -= n;
-    dst += n;
-    srcva = va0 + PGSIZE;
-  }
-  return 0;
-  // return copyin_new(pagetable, dst, srcva, len);
+  return copyin_new(pagetable, dst, srcva, len);
 }
 
 // Copy a null-terminated string from user to kernel.

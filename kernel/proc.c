@@ -274,7 +274,7 @@ growproc(int n)
     if((newsz = uvmalloc(p->pagetable, sz, sz + n)) == 0) {
       return -1;
     }
-    if (kvmcopy(p->pagetable, p->kpagetable, sz, n) < 0) {
+    if (kvmcopy(p->pagetable, p->kpagetable, sz, sz + n) < 0) {
       uvmdealloc(p->pagetable, newsz, sz);
       return -1;
     }
