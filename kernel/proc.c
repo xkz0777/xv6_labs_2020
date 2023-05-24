@@ -119,7 +119,7 @@ found:
   uint64 va = KSTACK((int)(p - proc));
   p->kstack = va;
   // Each process's kernel page table has a mapping for that process's kernel stack
-  kvmmap_(p->kpagetable, va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
+  kvmmap(p->kpagetable, va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
   // kvmmap(va, (uint64)pa, PGSIZE, PTE_R | PTE_W); 会导致 remap
 
   // Set up new context to start executing at forkret,
