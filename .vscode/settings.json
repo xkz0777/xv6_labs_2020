@@ -2,5 +2,17 @@
 	"editor.formatOnPaste": false,
 	"editor.formatOnSave": false,
 	"editor.formatOnType": false,
-	"editor.tabSize": 2
+	"editor.tabSize": 2,
+  "files.exclude": {
+    "**/*.d": true,
+    "**/*.o": true,
+    "**/*.asm": true,
+    "**/*.sym": true,
+    "**/*.S": true,
+    "**/_*": true,
+    "user/initcode": true,
+    "user/initcode.out": true,
+    "mkfs": true,
+    "kernel/kernel": true,
+  }
 }
