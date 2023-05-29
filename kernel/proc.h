@@ -109,4 +109,25 @@ struct proc {
   uint64 handler;              // address of handler function
   int ticks_passed;            // ticks passed since the last call to handler
 
+  // Registers to restore in sigreturn
+  uint64 sepc;
+  uint64 a0;
+  uint64 a1;
+  uint64 a2;
+  uint64 a3;
+  uint64 a4;
+  uint64 a5;
+  uint64 a6;
+  uint64 a7;
+  uint64 sp;
+  uint64 ra;
+  uint64 s0;
+  uint64 s1;
+  uint64 s2;
+  uint64 s3;
+  uint64 s4;
+  uint64 s5;
+
+  // Prevent re-entrant
+  int inside;
 };

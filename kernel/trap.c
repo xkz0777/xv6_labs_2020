@@ -79,7 +79,29 @@ usertrap(void)
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2) {
     p->ticks_passed++;
-    if (p->ticks > 0 && p->ticks_passed % p->ticks == 0) {
+    if (p->ticks > 0 && p->inside == 0 && p->ticks_passed % p->ticks == 0) {
+      // save registers
+      p->sepc = p->trapframe->epc;
+      p->a0 = p->trapframe->a0;
+      p->a1 = p->trapframe->a1;
+      p->a2 = p->trapframe->a2;
+      p->a3 = p->trapframe->a3;
+      p->a4 = p->trapframe->a4;
+      p->a5 = p->trapframe->a5;
+      p->a6 = p->trapframe->a6; 
+      p->a7 = p->trapframe->a7;
+      p->sp = p->trapframe->sp;
+      p->ra = p->trapframe->ra;
+      p->s0 = p->trapframe->s0;
+      p->s1 = p->trapframe->s1;
+      p->s2 = p->trapframe->s2;
+      p->s3 = p->trapframe->s3;
+      p->s4 = p->trapframe->s4;
+      p->s5 = p->trapframe->s5;
+
+      p->inside = 1;
+
+      // jump to hanlder when trap goes back
       p->trapframe->epc = p->handler;
     }
     yield();
