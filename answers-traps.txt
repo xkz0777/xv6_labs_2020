@@ -1,0 +1,38 @@
+> Q: Which registers contain arguments to functions? For example, which register holds 13 in main's call to printf?
+
+A: According to Chapter 18.2 of [Calling convensions](https://pdos.csail.mit.edu/6.S081/2020/readings/riscv-calling.pdf)
+in reference page, a0-a7 are used for integer arguments, fa0-fa7 are used for float arguments.
+a2 stores 13 (li a2,13)
+
+> Q: Where is the call to function f in the assembly code for main? Where is the call to g? (Hint: the compiler may inline functions.)
+
+A: None. g(x) is inlined within f(x) and f(x) is further inlined into main(), f(8) + 1 is expanded as 12.
+
+> Q: At what address is the function printf located?
+
+A: 0x628
+
+> Q: What value is in the register ra just after the jalr to printf in main?
+
+A: 0x38. (ra: return address)
+
+> Q: Run the following code.
+> ```c
+> unsigned int i = 0x00646c72;
+> printf("H%x Wo%s", 57616, &i);
+> ```
+> What is the output?
+> If the RISC-V were instead big-endian what would you set i to in order to yield the same output?
+> Would you need to change 57616 to a different value?
+
+A: `He110 World`
+If the RISC-V were instead big-endian, i should be set to `0x726c6400`.
+57616 don't need to be changed because it is alsways 110 in hex.
+
+> Q: In the following code, what is going to be printed after 'y='?
+> (note: the answer is not a specific value.) Why does this happen?
+> ```c
+> printf("x=%d y=%d", 3);
+> ```
+
+A: It is a random value, depending on what register a2 contains in previous code.
