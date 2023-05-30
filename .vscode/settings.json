@@ -1,8 +1,8 @@
 {
-	"editor.formatOnPaste": false,
-	"editor.formatOnSave": false,
-	"editor.formatOnType": false,
-	"editor.tabSize": 2,
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": false,
+  "editor.formatOnType": false,
+  "editor.tabSize": 2,
   "files.exclude": {
     "**/*.d": true,
     "**/*.o": true,
