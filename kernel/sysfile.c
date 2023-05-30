@@ -75,6 +75,12 @@ sys_read(void)
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argaddr(1, &p) < 0)
     return -1;
+
+  struct proc *process = myproc();
+  if (process->sz >= p + n) {
+    uvmalloc(process->pagetable, p, p + n);
+  }
+
   return fileread(f, p, n);
 }
 
@@ -88,6 +94,11 @@ sys_write(void)
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argaddr(1, &p) < 0)
     return -1;
 
+  struct proc *process = myproc();
+  if (process->sz >= p + n) {
+    uvmalloc(process->pagetable, p, p + n);
+  }
+  
   return filewrite(f, p, n);
 }
 
@@ -474,6 +485,9 @@ sys_pipe(void)
     fileclose(wf);
     return -1;
   }
+
+  uvmalloc(p->pagetable, fdarray, fdarray + sizeof(fd0) + sizeof(fd1));
+
   if(copyout(p->pagetable, fdarray, (char*)&fd0, sizeof(fd0)) < 0 ||
      copyout(p->pagetable, fdarray+sizeof(fd0), (char *)&fd1, sizeof(fd1)) < 0){
     p->ofile[fd0] = 0;

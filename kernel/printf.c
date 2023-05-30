@@ -143,7 +143,7 @@ backtrace(void)
 
   while (fp != top) {
     uint64 ra = *((uint64 *)(fp - 8)); 
-    printf("%p\n", ra - 8);
+    printf("%p\n", ra - 4);
     fp = *((uint64 *)(fp - 16));
   }
 }

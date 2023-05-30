@@ -69,20 +69,25 @@ usertrap(void)
     // ok
   } else {
     uint64 scause = r_scause();
-    if (scause == 13 || scause == 15) { // page fault
-      uint64 stval = r_stval();
+    uint64 stval = r_stval();
+    if ((scause == 13 || scause == 15) && stval <= p->sz) { // page fault
       uint64 va = PGROUNDDOWN(stval);
-      char *mem = kalloc();
-      if(mem == 0){
-        panic("memory exhaustion");
+      pte_t *pte = walk(p->pagetable, va, 0);
+      if (pte != 0 && (*pte & PTE_V) == 1 && (*pte & PTE_U) == 0) {
+        p->killed = 1; // stack overflow
+      } else {
+        char *mem = kalloc();
+        if(mem == 0){
+          p->killed = 1; // kalloc fails, kill process
+        } else {
+          memset(mem, 0, PGSIZE);
+          if(mappages(p->pagetable, va, PGSIZE, (uint64)mem, PTE_W|PTE_X|PTE_R|PTE_U) != 0){
+            kfree(mem);
+            uvmdealloc(p->pagetable, va, va);
+            panic("can't map");
+          }
+        }
       }
-      memset(mem, 0, PGSIZE);
-      if(mappages(p->pagetable, va, PGSIZE, (uint64)mem, PTE_W|PTE_X|PTE_R|PTE_U) != 0){
-        kfree(mem);
-        uvmdealloc(p->pagetable, va, va);
-        panic("can't map");
-      }
-
     } else {
       printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
       printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
