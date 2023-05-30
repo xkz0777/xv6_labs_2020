@@ -134,11 +134,6 @@ sys_sigreturn(void)
   p->trapframe->sp = p->sp;
   p->trapframe->ra = p->ra;
   p->trapframe->s0 = p->s0;
-  p->trapframe->s1 = p->s1;
-  p->trapframe->s2 = p->s2;
-  p->trapframe->s3 = p->s3;
-  p->trapframe->s4 = p->s4;
-  p->trapframe->s5 = p->s5;
 
   p->inside = 0;
 

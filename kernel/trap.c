@@ -93,11 +93,6 @@ usertrap(void)
       p->sp = p->trapframe->sp;
       p->ra = p->trapframe->ra;
       p->s0 = p->trapframe->s0;
-      p->s1 = p->trapframe->s1;
-      p->s2 = p->trapframe->s2;
-      p->s3 = p->trapframe->s3;
-      p->s4 = p->trapframe->s4;
-      p->s5 = p->trapframe->s5;
 
       p->inside = 1;
 
