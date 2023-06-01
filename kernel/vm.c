@@ -5,6 +5,8 @@
 #include "riscv.h"
 #include "defs.h"
 #include "fs.h"
+#include "spinlock.h"
+#include "proc.h"
 
 /*
  * the kernel's page table.
@@ -236,9 +238,6 @@ uvmalloc(pagetable_t pagetable, uint64 oldsz, uint64 newsz)
 
   oldsz = PGROUNDUP(oldsz);
   for(a = oldsz; a < newsz; a += PGSIZE){
-    if (walkaddr(pagetable, a) != 0) {
-      continue;
-    }
     mem = kalloc();
     if(mem == 0){
       uvmdealloc(pagetable, a, oldsz);
@@ -361,6 +360,15 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 
   while(len > 0){
     va0 = PGROUNDDOWN(dstva);
+
+    // 防止 syscall 的 user page 还没分配
+    pte_t *pte;
+    if (va0 < myproc()->sz &&
+        ((pte = walk(pagetable, va0, 0)) == 0 ||
+        (*pte & PTE_V) == 0)) {
+      lazyalloc(pagetable, va0);
+    }
+
     pa0 = walkaddr(pagetable, va0);
     if(pa0 == 0)
       return -1;
@@ -386,6 +394,13 @@ copyin(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
 
   while(len > 0){
     va0 = PGROUNDDOWN(srcva);
+    pte_t *pte;
+    if (va0 < myproc()->sz &&
+        ((pte = walk(pagetable, va0, 0)) == 0 ||
+        (*pte & PTE_V) == 0)) {
+      lazyalloc(pagetable, va0);
+    }
+
     pa0 = walkaddr(pagetable, va0);
     if(pa0 == 0)
       return -1;
@@ -442,4 +457,18 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   } else {
     return -1;
   }
+}
+
+int lazyalloc(pagetable_t pagetable, uint64 va) {
+  char *mem = kalloc();
+  if(mem == 0){
+    return -1; // kalloc fails, kill process
+  }
+  memset(mem, 0, PGSIZE);
+  if(mappages(pagetable, va, PGSIZE, (uint64)mem, PTE_W|PTE_X|PTE_R|PTE_U) != 0){
+    kfree(mem);
+    uvmdealloc(pagetable, va, va);
+    panic("lazyalloc");
+  }
+  return 0;
 }

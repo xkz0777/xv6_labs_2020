@@ -74,17 +74,8 @@ usertrap(void)
     if ((scause == 13 || scause == 15) &&
          stval < p->sz &&
          PGROUNDUP(stval) != PGROUNDDOWN(p->trapframe->sp)) { // page fault
-      uint64 va = PGROUNDDOWN(stval);
-      char *mem = kalloc();
-      if(mem == 0){
-        p->killed = 1; // kalloc fails, kill process
-      } else {
-        memset(mem, 0, PGSIZE);
-        if(mappages(p->pagetable, va, PGSIZE, (uint64)mem, PTE_W|PTE_X|PTE_R|PTE_U) != 0){
-          kfree(mem);
-          uvmdealloc(p->pagetable, va, va);
-          panic("can't map");
-        }
+      if (lazyalloc(p->pagetable, PGROUNDDOWN(stval)) < 0) {
+        p->killed = 1;
       }
     } else {
       printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
